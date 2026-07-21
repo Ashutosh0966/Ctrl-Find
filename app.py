@@ -5,8 +5,8 @@ import numpy as np
 
 app = FastAPI(title="Ctrl-Find AI Backend")
 
-# Load model once
-model = YOLO("yolov8n.pt")
+# Load your trained Glasses Detection model
+model = YOLO("ultralytics/runs/detect/train-3/weights/best.pt")
 
 
 @app.get("/")
@@ -20,8 +20,10 @@ def home():
 
 @app.post("/detect")
 async def detect(file: UploadFile = File(...)):
+    # Read uploaded image
     image_bytes = await file.read()
 
+    # Convert bytes to OpenCV image
     image = np.frombuffer(image_bytes, np.uint8)
     frame = cv2.imdecode(image, cv2.IMREAD_COLOR)
 
@@ -31,6 +33,7 @@ async def detect(file: UploadFile = File(...)):
             "message": "Invalid Image"
         }
 
+    # Run detection
     results = model(frame)
 
     objects = []

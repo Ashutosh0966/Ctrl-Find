@@ -1,0 +1,13 @@
+train: ../train/images
+val: ../valid/images
+test: ../test/images
+
+nc: 1
+names: ['glasses']
+
+roboflow:
+  workspace: g-obe3y
+  project: glasses-davjv
+  version: 2
+  license: Public Domain
+  url: https://universe.roboflow.com/g-obe3y/glasses-davjv/dataset/2
