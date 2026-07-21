@@ -1,53 +1,51 @@
-from fastapi import FastAPI
-
-app = FastAPI()
-
-@app.get("/")
-def home():
-    return {
-        "status": "Working",
-        "message": "YOLO Backend Started Successfully"
-    }
 from fastapi import FastAPI, UploadFile, File
 from ultralytics import YOLO
 import cv2
 import numpy as np
 
-app = FastAPI()
+app = FastAPI(title="Ctrl-Find AI Backend")
 
-# Load YOLO model only once
+# Load model once
 model = YOLO("yolov8n.pt")
 
 
 @app.get("/")
 def home():
-    return {"status": "Working"}
+    return {
+        "status": "Working",
+        "project": "Ctrl-Find",
+        "message": "Backend Running Successfully"
+    }
 
 
 @app.post("/detect")
 async def detect(file: UploadFile = File(...)):
-
     image_bytes = await file.read()
 
     image = np.frombuffer(image_bytes, np.uint8)
-
     frame = cv2.imdecode(image, cv2.IMREAD_COLOR)
+
+    if frame is None:
+        return {
+            "status": "error",
+            "message": "Invalid Image"
+        }
 
     results = model(frame)
 
-    detections = []
+    objects = []
 
     for box in results[0].boxes:
-
         cls = int(box.cls)
-
         conf = float(box.conf)
 
-        detections.append({
-            "object": model.names[cls],
+        objects.append({
+            "name": model.names[cls],
             "confidence": round(conf, 2)
         })
 
     return {
-        "detections": detections
+        "status": "success",
+        "total_objects": len(objects),
+        "objects": objects
     }
